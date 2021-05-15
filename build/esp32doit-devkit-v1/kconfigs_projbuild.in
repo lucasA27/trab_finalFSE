@@ -1,0 +1,5 @@
+source "C:/Users/Lucas/.platformio/packages/framework-espidf/components/app_update/Kconfig.projbuild"
+source "C:/Users/Lucas/.platformio/packages/framework-espidf/components/bootloader/Kconfig.projbuild"
+source "C:/Users/Lucas/.platformio/packages/framework-espidf/components/esptool_py/Kconfig.projbuild"
+source "C:/Users/Lucas/.platformio/packages/framework-espidf/components/partition_table/Kconfig.projbuild"
+source "C:/Users/Lucas/Documents/PlatformIO/Projects/trabalho_final/src/Kconfig.projbuild"

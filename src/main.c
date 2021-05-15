@@ -8,18 +8,39 @@
 
 #include "../include/wifi.h"
 #include "../include/client.h"
+#include "../include/mqtt.h"
+#include "../include/dht11.h"
+#include "../include/gpio.h"
+
+#define led 2
+#define botao 0
 
 xSemaphoreHandle conexaoWifiSemaphore;
+xSemaphoreHandle conexaoMQTTSemaphore;
 
-void RealizaHTTPRequest(void * params)
+void conectadoWifi(void * params)
 {
   while(true)
   {
     if(xSemaphoreTake(conexaoWifiSemaphore, portMAX_DELAY))
     {
-      ESP_LOGI("Main Task", "Realiza HTTP Request");
-      http_request();
-      https_request();
+      // Processamento Internet
+      mqtt_start();
+    }
+  }
+}
+
+void trataComunicacaoComServidor(void * params)
+{
+  char mensagem[50];
+  if(xSemaphoreTake(conexaoMQTTSemaphore, portMAX_DELAY))
+  {
+    while(true)
+    {
+       float temperatura = 20.0 + (float)rand()/(float)(RAND_MAX/10.0);
+       sprintf(mensagem, "temperatura1: %f", temperatura);
+       mqtt_envia_mensagem("sensores/temperatura", mensagem);
+       vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
   }
 }
@@ -35,10 +56,11 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
     
     conexaoWifiSemaphore = xSemaphoreCreateBinary();
+    conexaoMQTTSemaphore = xSemaphoreCreateBinary();
     wifi_start();
 
-    xTaskCreate(&RealizaHTTPRequest,  "Processa HTTP", 4096, NULL, 1, NULL);
-
- // printf("Olá mundo\n");
-    
+    xTaskCreate(&conectadoWifi,  "Conexão ao MQTT", 4096, NULL, 1, NULL);
+    xTaskCreate(&trataComunicacaoComServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
+    //configura_botao(botao);
+   // configura_led(led);
 }
