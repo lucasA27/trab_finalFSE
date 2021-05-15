@@ -45,7 +45,6 @@ char *constroi_topico(char *opcao)
 
 void trataComunicacaoComServidor(void *params)
 {
-  char mensagem[50];
 
   cJSON *data_temperature = cJSON_CreateObject();
 
@@ -99,6 +98,7 @@ void app_main(void)
 
   xTaskCreate(&conectadoWifi, "Conexão ao MQTT", 4096, NULL, 1, NULL);
   xTaskCreate(&trataComunicacaoComServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
-  //configura_botao(botao);
-  // configura_led(led);
+  configura_botao(botao);
+  configura_led(led);
+  //gpio_set_level(led, 1);
 }
