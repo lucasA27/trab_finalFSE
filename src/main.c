@@ -11,18 +11,22 @@
 #include "../include/mqtt.h"
 #include "../include/dht11.h"
 #include "../include/gpio.h"
+#include "cJSON.h"
 
 #define led 2
 #define botao 0
+#define time 2000
+#define matricula 150018673
+#define _nomeComodo "comodo"
 
 xSemaphoreHandle conexaoWifiSemaphore;
 xSemaphoreHandle conexaoMQTTSemaphore;
 
-void conectadoWifi(void * params)
+void conectadoWifi(void *params)
 {
-  while(true)
+  while (true)
   {
-    if(xSemaphoreTake(conexaoWifiSemaphore, portMAX_DELAY))
+    if (xSemaphoreTake(conexaoWifiSemaphore, portMAX_DELAY))
     {
       // Processamento Internet
       mqtt_start();
@@ -30,37 +34,69 @@ void conectadoWifi(void * params)
   }
 }
 
-void trataComunicacaoComServidor(void * params)
+char *constroi_topico(char *opcao)
+{
+  char *topico = malloc(64);
+  snprintf(topico, 64, "fse2020/%d/%s/%s", matricula, _nomeComodo, opcao);
+  return topico;
+}
+
+void trataComunicacaoComServidor(void *params)
 {
   char mensagem[50];
-  if(xSemaphoreTake(conexaoMQTTSemaphore, portMAX_DELAY))
+
+  cJSON *data_temperature = cJSON_CreateObject();
+
+  cJSON *data_humidity = cJSON_CreateObject();
+
+  cJSON *data_status = cJSON_CreateObject();
+
+  if (xSemaphoreTake(conexaoMQTTSemaphore, portMAX_DELAY))
   {
-    while(true)
+    while (true)
     {
-       float temperatura = 20.0 + (float)rand()/(float)(RAND_MAX/10.0);
-       sprintf(mensagem, "temperatura1: %f", temperatura);
-       mqtt_envia_mensagem("sensores/temperatura", mensagem);
-       vTaskDelay(3000 / portTICK_PERIOD_MS);
+      struct dht11_reading dht11 = DHT11_read();
+
+      if (dht11.status >= 0)
+      {
+        
+        cJSON_AddNumberToObject(data_temperature, "temperature", dht11.temperature);
+        cJSON_AddNumberToObject(data_humidity, "humidity", dht11.humidity);
+        cJSON_AddNumberToObject(data_status, "status", dht11.status);
+        char *temp_json = cJSON_Print(data_temperature);
+        char *hum_json = cJSON_Print(data_humidity);
+        char *status_json = cJSON_Print(data_status);
+        mqtt_envia_mensagem(constroi_topico("temperature"), temp_json);
+        mqtt_envia_mensagem(constroi_topico("humidity"), hum_json);
+        mqtt_envia_mensagem(constroi_topico("status"), status_json);
+        printf("Temperatura: %s, humidade: %s, status: %s \n", temp_json, hum_json, status_json);
+        cJSON_DeleteItemFromObject(data_temperature, "temperature");
+        cJSON_DeleteItemFromObject(data_humidity, "humidity");
+        cJSON_DeleteItemFromObject(data_status, "status");
+      }
+      vTaskDelay(time / portTICK_PERIOD_MS);
     }
   }
 }
 
 void app_main(void)
 {
-    // Inicializa o NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-    
-    conexaoWifiSemaphore = xSemaphoreCreateBinary();
-    conexaoMQTTSemaphore = xSemaphoreCreateBinary();
-    wifi_start();
+  // Inicializa o NVS
+  esp_err_t ret = nvs_flash_init();
+  DHT11_init(GPIO_NUM_4);
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+  {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
 
-    xTaskCreate(&conectadoWifi,  "Conexão ao MQTT", 4096, NULL, 1, NULL);
-    xTaskCreate(&trataComunicacaoComServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
-    //configura_botao(botao);
-   // configura_led(led);
+  conexaoWifiSemaphore = xSemaphoreCreateBinary();
+  conexaoMQTTSemaphore = xSemaphoreCreateBinary();
+  wifi_start();
+
+  xTaskCreate(&conectadoWifi, "Conexão ao MQTT", 4096, NULL, 1, NULL);
+  xTaskCreate(&trataComunicacaoComServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
+  //configura_botao(botao);
+  // configura_led(led);
 }
