@@ -13,6 +13,7 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+
 #define WIFI_SSID      CONFIG_ESP_WIFI_SSID
 #define WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
 #define WIFI_MAXIMUM_RETRY  CONFIG_ESP_MAXIMUM_RETRY
@@ -21,6 +22,7 @@
 #define WIFI_FAIL_BIT      BIT1
 
 #define TAG "Wifi"
+#define TAG2 "MQTT"
 
 static EventGroupHandle_t s_wifi_event_group;
 
@@ -108,6 +110,27 @@ void wifi_start(){
    // ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
    // ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
     vEventGroupDelete(s_wifi_event_group);
+}
+
+char* get_mac_address()
+{
+    u_int8_t mac_address[6] = {0};
+    int size = 25;
+    char *mac = malloc(size);
+    esp_efuse_mac_get_default(mac_address);
+    snprintf(
+        mac,
+        size,
+        "%x:%x:%x:%x:%x:%x",
+        mac_address[0],
+        mac_address[1],
+        mac_address[2],
+        mac_address[3],
+        mac_address[4],
+        mac_address[5]
+    );
+    ESP_LOGI(TAG2, "MAC ADDRESS: [%s]", mac);
+    return mac;
 }
 
 void wifi_stop();

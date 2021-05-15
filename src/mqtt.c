@@ -19,8 +19,12 @@
 #include "mqtt_client.h"
 
 #include "../include/mqtt.h"
+#include "cJSON.h"
+#include "../include/wifi.h"
 
 #define TAG "MQTT"
+#define ENERGIA "ENERGY"
+#define matricula 150018673
 
 extern xSemaphoreHandle conexaoMQTTSemaphore;
 esp_mqtt_client_handle_t client;
@@ -77,6 +81,25 @@ void mqtt_start()
     client = esp_mqtt_client_init(&mqtt_config);
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, client);
     esp_mqtt_client_start(client);
+}
+
+void mqtt_conection()
+{
+    char *mac = malloc(25);
+    mac = get_mac_address();
+
+    cJSON *conexao = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(conexao, "type", ENERGIA);
+    cJSON_AddStringToObject(conexao, "mac", mac);
+
+    char *json = cJSON_Print(conexao);
+
+    char topico[64];
+    snprintf(topico, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
+
+    mqtt_envia_mensagem(topico, json);
+    //mqtt_receive_message(topico);
 }
 
 void mqtt_envia_mensagem(char * topico, char * mensagem)

@@ -30,6 +30,8 @@ void conectadoWifi(void *params)
     {
       // Processamento Internet
       mqtt_start();
+      //inicia conexao
+      mqtt_conection();
     }
   }
 }
