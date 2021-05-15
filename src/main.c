@@ -12,6 +12,7 @@
 #include "../include/dht11.h"
 #include "../include/gpio.h"
 #include "cJSON.h"
+#include "nvs.h"
 
 #define led 2
 #define botao 0
@@ -21,6 +22,7 @@
 
 xSemaphoreHandle conexaoWifiSemaphore;
 xSemaphoreHandle conexaoMQTTSemaphore;
+xSemaphoreHandle conexaoregistroSemaphore;
 
 void conectadoWifi(void *params)
 {
@@ -32,6 +34,13 @@ void conectadoWifi(void *params)
       mqtt_start();
       //inicia conexao
       mqtt_conection();
+
+      if (xSemaphoreTake(conexaoregistroSemaphore, portMAX_DELAY))
+      {
+        configura_botao(botao);
+        configura_led(led);
+        //gpio_set_level(led, 1);
+      }
     }
   }
 }
@@ -60,7 +69,7 @@ void trataComunicacaoComServidor(void *params)
 
       if (dht11.status >= 0)
       {
-        
+
         cJSON_AddNumberToObject(data_temperature, "temperature", dht11.temperature);
         cJSON_AddNumberToObject(data_humidity, "humidity", dht11.humidity);
         cJSON_AddNumberToObject(data_status, "status", dht11.status);
@@ -94,11 +103,10 @@ void app_main(void)
 
   conexaoWifiSemaphore = xSemaphoreCreateBinary();
   conexaoMQTTSemaphore = xSemaphoreCreateBinary();
+  conexaoregistroSemaphore = xSemaphoreCreateBinary();
+
   wifi_start();
 
   xTaskCreate(&conectadoWifi, "Conexão ao MQTT", 4096, NULL, 1, NULL);
   xTaskCreate(&trataComunicacaoComServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
-  configura_botao(botao);
-  configura_led(led);
-  //gpio_set_level(led, 1);
 }
