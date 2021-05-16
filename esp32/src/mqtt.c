@@ -160,6 +160,7 @@ void mqtt_conection()
 
         mqtt_envia_mensagem(topico, json);
         grava_valor_nvs("macValue", mac);
+        mqtt_recebe_message(topico);
     }
     else
     {
