@@ -53,6 +53,15 @@ char *get_mac_address()
     return mac;
 }
 
+
+char *constroi_topico(char *option)
+{
+    int topic_size = 64;
+    char *topic = malloc(topic_size);
+    snprintf(topic, topic_size, "fse2020/%d/%s/%s", matricula, _comodo, option);
+    return topic;
+}
+
 void mqtt_handle_data(int length, char *data)
 {
     cJSON *body = cJSON_Parse(data);

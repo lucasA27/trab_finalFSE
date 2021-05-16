@@ -18,13 +18,10 @@
 #define botao 0
 #define time 2000
 #define matricula 150018673
-#define _nomeComodo "comodo"
 
 xSemaphoreHandle conexaoWifiSemaphore;
 xSemaphoreHandle conexaoMQTTSemaphore;
 xSemaphoreHandle conexaoRegistroSemaphore;
-
-
 
 void conectadoWifi(void *params)
 {
@@ -45,13 +42,6 @@ void conectadoWifi(void *params)
       }
     }
   }
-}
-
-char *constroi_topico(char *opcao)
-{
-  char *topico = malloc(64);
-  snprintf(topico, 64, "fse2020/%d/%s/%s", matricula, _nomeComodo, opcao);
-  return topico;
 }
 
 void enviaDht11DataServidor(void *params)
