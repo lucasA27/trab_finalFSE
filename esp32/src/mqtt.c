@@ -69,9 +69,9 @@ void mqtt_handle_data(int length, char *data)
     cJSON *body = cJSON_Parse(data);
 
     char *type = cJSON_GetObjectItem(body, "type")->valuestring;
-
-    if (strcmp(type, "regritrar") == 0)
+    if (strcmp(type, "registrar") == 0)
     {
+        memset(_comodo,0,sizeof(_comodo));
         strcpy(_comodo, cJSON_GetObjectItem(body, "comodo")->valuestring);
         grava_valor_nvs("comodo", _comodo);
         xSemaphoreGive(conexaoRegistroSemaphore);
@@ -149,7 +149,7 @@ void mqtt_conection()
     char *macValue = le_valor_nvs("macValue");
 
   //  if (macValue == NULL || strlen(macValue) == 0)
-    {
+   // {
         cJSON *conexao = cJSON_CreateObject();
 
         cJSON_AddStringToObject(conexao, "type", ENERGIA);
@@ -163,7 +163,7 @@ void mqtt_conection()
         mqtt_envia_mensagem(topico, json);
         grava_valor_nvs("macValue", mac);
         mqtt_recebe_message(topico);
-    }
+    //}
    /* else
     {
         xSemaphoreGive(conexaoRegistroSemaphore);

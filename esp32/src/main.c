@@ -14,6 +14,7 @@
 #include "cJSON.h"
 #include "nvs.h"
 
+
 #define led 2
 #define botao 0
 #define time 2000
@@ -53,6 +54,10 @@ void enviaDht11DataServidor(void *params)
 
   cJSON *data_status = cJSON_CreateObject();
 
+  cJSON_AddStringToObject(data_temperature, "mac", get_mac_address());
+
+  cJSON_AddStringToObject(data_humidity, "mac", get_mac_address());
+
   if (xSemaphoreTake(conexaoMQTTSemaphore, portMAX_DELAY))
   {
     while (true)
@@ -63,17 +68,27 @@ void enviaDht11DataServidor(void *params)
       {
 
         cJSON_AddNumberToObject(data_temperature, "temperature", dht11.temperature);
+
         cJSON_AddNumberToObject(data_humidity, "humidity", dht11.humidity);
+
         cJSON_AddNumberToObject(data_status, "status", dht11.status);
+
         char *temp_json = cJSON_Print(data_temperature);
+
         char *hum_json = cJSON_Print(data_humidity);
+
         char *status_json = cJSON_Print(data_status);
+
         mqtt_envia_mensagem(constroi_topico("temperature"), temp_json);
+
         mqtt_envia_mensagem(constroi_topico("humidity"), hum_json);
+
         mqtt_envia_mensagem(constroi_topico("status"), status_json);
-        printf("Temperatura: %s, humidade: %s, status: %s \n", temp_json, hum_json, status_json);
+
         cJSON_DeleteItemFromObject(data_temperature, "temperature");
+
         cJSON_DeleteItemFromObject(data_humidity, "humidity");
+
         cJSON_DeleteItemFromObject(data_status, "status");
       }
       vTaskDelay(time / portTICK_PERIOD_MS);
