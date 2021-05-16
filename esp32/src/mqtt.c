@@ -21,6 +21,8 @@
 #include "../include/mqtt.h"
 #include "cJSON.h"
 #include "../include/nvs.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 
 #define TAG "MQTT"
 #define ENERGIA "ENERGY"
@@ -29,7 +31,7 @@
 extern xSemaphoreHandle conexaoMQTTSemaphore;
 extern xSemaphoreHandle conexaoRegistroSemaphore;
 
-char _comodo[20];
+char _comodo[20]="comodo";
 
 esp_mqtt_client_handle_t client;
 
@@ -71,14 +73,14 @@ void mqtt_handle_data(int length, char *data)
     if (strcmp(type, "regritrar") == 0)
     {
         strcpy(_comodo, cJSON_GetObjectItem(body, "comodo")->valuestring);
-        nvs_save_string("comodo", _comodo);
+        grava_valor_nvs("comodo", _comodo);
         xSemaphoreGive(conexaoRegistroSemaphore);
     }
 
     if (strcmp(type, "apagarRegistro") == 0)
     {
-        nvs_erase();
-        mqtt_register();
+        nvs_apaga();
+        mqtt_conection();
     }
 }
 
@@ -146,7 +148,7 @@ void mqtt_conection()
 
     char *macValue = le_valor_nvs("macValue");
 
-    if (macValue == NULL || strlen(macValue) == 0)
+  //  if (macValue == NULL || strlen(macValue) == 0)
     {
         cJSON *conexao = cJSON_CreateObject();
 
@@ -162,7 +164,7 @@ void mqtt_conection()
         grava_valor_nvs("macValue", mac);
         mqtt_recebe_message(topico);
     }
-    else
+   /* else
     {
         xSemaphoreGive(conexaoRegistroSemaphore);
 
@@ -170,7 +172,7 @@ void mqtt_conection()
         snprintf(topico, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
 
         mqtt_recebe_message(topico);
-    }
+    }*/
 }
 
 void mqtt_envia_mensagem(char *topico, char *mensagem)

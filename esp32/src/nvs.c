@@ -47,6 +47,8 @@ char *le_valor_nvs(char *nome)
     return valor;
 }
 
+
+
 void grava_valor_nvs(char *nome, char *valor)
 {
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -68,4 +70,9 @@ void grava_valor_nvs(char *nome, char *valor)
     }
     nvs_commit(particao_padrao_handle);
     nvs_close(particao_padrao_handle);
+}
+
+void nvs_apaga()
+{
+  grava_valor_nvs("comodo", "");
 }

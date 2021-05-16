@@ -3,4 +3,5 @@
 
 void grava_valor_nvs(char *nome, char *valor);
 char *le_valor_nvs(char *nome);
+void nvs_apaga();
 #endif
