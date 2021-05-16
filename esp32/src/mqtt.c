@@ -20,7 +20,6 @@
 
 #include "../include/mqtt.h"
 #include "cJSON.h"
-#include "../include/wifi.h"
 #include "../include/nvs.h"
 
 #define TAG "MQTT"
@@ -28,9 +27,51 @@
 #define matricula 150018673
 
 extern xSemaphoreHandle conexaoMQTTSemaphore;
-extern xSemaphoreHandle conexaoregistroSemaphore;
+extern xSemaphoreHandle conexaoRegistroSemaphore;
+
+char _comodo[20];
 
 esp_mqtt_client_handle_t client;
+
+char *get_mac_address()
+{
+    u_int8_t mac_address[6] = {0};
+    int size = 25;
+    char *mac = malloc(size);
+    esp_efuse_mac_get_default(mac_address);
+    snprintf(
+        mac,
+        size,
+        "%x:%x:%x:%x:%x:%x",
+        mac_address[0],
+        mac_address[1],
+        mac_address[2],
+        mac_address[3],
+        mac_address[4],
+        mac_address[5]);
+    ESP_LOGI(TAG, "MAC ADDRESS: [%s]", mac);
+    return mac;
+}
+
+void mqtt_handle_data(int length, char *data)
+{
+    cJSON *body = cJSON_Parse(data);
+
+    char *type = cJSON_GetObjectItem(body, "type")->valuestring;
+
+    if (strcmp(type, "regritrar") == 0)
+    {
+        strcpy(_comodo, cJSON_GetObjectItem(body, "comodo")->valuestring);
+        nvs_save_string("comodo", _comodo);
+        xSemaphoreGive(conexaoRegistroSemaphore);
+    }
+
+    if (strcmp(type, "apagarRegistro") == 0)
+    {
+        nvs_erase();
+        mqtt_register();
+    }
+}
 
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
@@ -47,7 +88,6 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
         break;
-
     case MQTT_EVENT_SUBSCRIBED:
         ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
         break;
@@ -59,8 +99,9 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         break;
     case MQTT_EVENT_DATA:
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        printf("DATA=%.*s\r\n", event->data_len, event->data);
+        mqtt_handle_data(event->data_len, event->data);
+        //printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+        //printf("DATA=%.*s\r\n", event->data_len, event->data);
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -113,19 +154,22 @@ void mqtt_conection()
     }
     else
     {
-        xSemaphoreGive(conexaoregistroSemaphore);
+        xSemaphoreGive(conexaoRegistroSemaphore);
 
-        char topic[64];
-        snprintf(topic, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
-        
-        //mqtt_receive_message(topic);
+        char topico[64];
+        snprintf(topico, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
+
+        mqtt_recebe_message(topico);
     }
-
-    //mqtt_receive_message(topico);
 }
 
 void mqtt_envia_mensagem(char *topico, char *mensagem)
 {
     int message_id = esp_mqtt_client_publish(client, topico, mensagem, 0, 1, 0);
     ESP_LOGI(TAG, "Mesnagem enviada, ID: %d", message_id);
+}
+
+void mqtt_recebe_message(char *topico)
+{
+    esp_mqtt_client_subscribe(client, topico, 0);
 }

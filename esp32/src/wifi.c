@@ -112,25 +112,6 @@ void wifi_start(){
     vEventGroupDelete(s_wifi_event_group);
 }
 
-char* get_mac_address()
-{
-    u_int8_t mac_address[6] = {0};
-    int size = 25;
-    char *mac = malloc(size);
-    esp_efuse_mac_get_default(mac_address);
-    snprintf(
-        mac,
-        size,
-        "%x:%x:%x:%x:%x:%x",
-        mac_address[0],
-        mac_address[1],
-        mac_address[2],
-        mac_address[3],
-        mac_address[4],
-        mac_address[5]
-    );
-    ESP_LOGI(TAG2, "MAC ADDRESS: [%s]", mac);
-    return mac;
-}
+
 
 void wifi_stop();

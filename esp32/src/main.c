@@ -22,7 +22,9 @@
 
 xSemaphoreHandle conexaoWifiSemaphore;
 xSemaphoreHandle conexaoMQTTSemaphore;
-xSemaphoreHandle conexaoregistroSemaphore;
+xSemaphoreHandle conexaoRegistroSemaphore;
+
+
 
 void conectadoWifi(void *params)
 {
@@ -35,7 +37,7 @@ void conectadoWifi(void *params)
       //inicia conexao
       mqtt_conection();
 
-      if (xSemaphoreTake(conexaoregistroSemaphore, portMAX_DELAY))
+      if (xSemaphoreTake(conexaoRegistroSemaphore, portMAX_DELAY))
       {
         configura_botao(botao);
         configura_led(led);
@@ -52,7 +54,7 @@ char *constroi_topico(char *opcao)
   return topico;
 }
 
-void trataComunicacaoComServidor(void *params)
+void enviaDht11DataServidor(void *params)
 {
 
   cJSON *data_temperature = cJSON_CreateObject();
@@ -103,10 +105,10 @@ void app_main(void)
 
   conexaoWifiSemaphore = xSemaphoreCreateBinary();
   conexaoMQTTSemaphore = xSemaphoreCreateBinary();
-  conexaoregistroSemaphore = xSemaphoreCreateBinary();
+  conexaoRegistroSemaphore = xSemaphoreCreateBinary();
 
   wifi_start();
 
   xTaskCreate(&conectadoWifi, "Conexão ao MQTT", 4096, NULL, 1, NULL);
-  xTaskCreate(&trataComunicacaoComServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
+  xTaskCreate(&enviaDht11DataServidor, "Comunicação com Broker", 4096, NULL, 1, NULL);
 }
