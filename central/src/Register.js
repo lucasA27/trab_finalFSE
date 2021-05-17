@@ -33,7 +33,7 @@ const Register = ({ open, submit, item, onClose }) => {
           <form noValidate autoComplete='off' onSubmit={onSubmit}>
             <TextField
               id='input'
-              label='Nome da Entrada'
+              label='Entrada'
               value={data.inputName}
               onInput={e => onInput('inputName', e.target.value)}
             />
@@ -42,7 +42,7 @@ const Register = ({ open, submit, item, onClose }) => {
               <>
                 <TextField
                   id='output'
-                  label='Nome da Saída'
+                  label='Saída'
                   value={data.outputName}
                   onInput={e => onInput('outputName', e.target.value)}
                 />
@@ -51,25 +51,14 @@ const Register = ({ open, submit, item, onClose }) => {
             )}
             <TextField
               id='name'
-              label='Nome do Cômodo'
+              label='Cômodo'
               value={data.comodo}
               onInput={e => onInput('comodo', e.target.value)}
             />
             <br /><br />
-            {item.type === 'ENERGY' && (
-              <>
-                <p>Entrada dispara alarme?</p>
-                <Checkbox
-                  checked={data.alarm}
-                  onChange={e => onInput('alarm', e.target.checked)}
-                  inputProps={{ 'aria-label': 'primary checkbox' }}
-                />
-                <br /><br />
-              </>
-            )}
             <Button
               key={1}
-              color='primary'
+              color='secondary'
               variant='contained'
               type='submit'
             >

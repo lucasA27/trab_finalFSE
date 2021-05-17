@@ -23,6 +23,7 @@
 #include "../include/nvs.h"
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "driver/gpio.h"
 
 #define TAG "MQTT"
 #define ENERGIA "ENERGY"
@@ -31,7 +32,9 @@
 extern xSemaphoreHandle conexaoMQTTSemaphore;
 extern xSemaphoreHandle conexaoRegistroSemaphore;
 
-char _comodo[20]="comodo";
+char _comodo[20] = "comodo";
+#define led 2
+int led_status = 0;
 
 esp_mqtt_client_handle_t client;
 
@@ -55,7 +58,6 @@ char *get_mac_address()
     return mac;
 }
 
-
 char *constroi_topico(char *option)
 {
     int topic_size = 64;
@@ -64,14 +66,23 @@ char *constroi_topico(char *option)
     return topic;
 }
 
+char *in_out_topico(char *option)
+{
+    int topic_size = 64;
+    char *topic = malloc(topic_size);
+    snprintf(topic, topic_size, "fse2020/%d/%s/%s", matricula, get_mac_address(), option);
+    return topic;
+}
+
 void mqtt_handle_data(int length, char *data)
 {
     cJSON *body = cJSON_Parse(data);
 
     char *type = cJSON_GetObjectItem(body, "type")->valuestring;
+    char *comando = cJSON_GetObjectItem(body, "comando")->valuestring;
     if (strcmp(type, "registrar") == 0)
     {
-        memset(_comodo,0,sizeof(_comodo));
+        memset(_comodo, 0, sizeof(_comodo));
         strcpy(_comodo, cJSON_GetObjectItem(body, "comodo")->valuestring);
         grava_valor_nvs("comodo", _comodo);
         xSemaphoreGive(conexaoRegistroSemaphore);
@@ -81,6 +92,20 @@ void mqtt_handle_data(int length, char *data)
     {
         nvs_apaga();
         mqtt_conection();
+    }
+
+    if (strcmp(type, "SET_OUTPUT") == 0)
+    {
+        if (led_status == 0)
+        {
+            gpio_set_level(led, 1);
+            led_status = 1;
+        }
+        else
+        {
+            gpio_set_level(led, 0);
+            led_status = 0;
+        }
     }
 }
 
@@ -148,23 +173,23 @@ void mqtt_conection()
 
     char *macValue = le_valor_nvs("macValue");
 
-  //  if (macValue == NULL || strlen(macValue) == 0)
-   // {
-        cJSON *conexao = cJSON_CreateObject();
+    //  if (macValue == NULL || strlen(macValue) == 0)
+    // {
+    cJSON *conexao = cJSON_CreateObject();
 
-        cJSON_AddStringToObject(conexao, "type", ENERGIA);
-        cJSON_AddStringToObject(conexao, "mac", mac);
+    cJSON_AddStringToObject(conexao, "type", ENERGIA);
+    cJSON_AddStringToObject(conexao, "mac", mac);
 
-        char *json = cJSON_Print(conexao);
+    char *json = cJSON_Print(conexao);
 
-        char topico[64];
-        snprintf(topico, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
+    char topico[64];
+    snprintf(topico, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
 
-        mqtt_envia_mensagem(topico, json);
-        grava_valor_nvs("macValue", mac);
-        mqtt_recebe_message(topico);
+    mqtt_envia_mensagem(topico, json);
+    grava_valor_nvs("macValue", mac);
+    mqtt_recebe_message(topico);
     //}
-   /* else
+    /* else
     {
         xSemaphoreGive(conexaoRegistroSemaphore);
 
@@ -173,6 +198,14 @@ void mqtt_conection()
 
         mqtt_recebe_message(topico);
     }*/
+
+    char *topico_input = in_out_topico("input");
+    char *topic_output = in_out_topico("output");
+
+    ESP_LOGI(TAG, "TÓPICO BOTÃO: %s", topico_input);
+    ESP_LOGI(TAG, "TÓPICO LED: %s", topic_output);
+
+    mqtt_recebe_message(topic_output);
 }
 
 void mqtt_envia_mensagem(char *topico, char *mensagem)

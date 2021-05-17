@@ -1,16 +1,14 @@
 import React from 'react';
 
-import IconButton from '@material-ui/core/IconButton';
-import Delete from '@material-ui/icons/Delete';
 import Switch from '@material-ui/core/Switch';
 import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
 import Server from './mqtt';
 
 import useStyles from './styles';
 
-const Connected = ({ item }) => {
+const ConnectedBoard = ({ item }) => {
   const classes = useStyles();
 
   const onChange = () => {
@@ -34,23 +32,24 @@ const Connected = ({ item }) => {
         )}
         <p>{item.inputName}</p>
         {item.type === 'ENERGY' && (
-          <>
-            <p>{item.outputName}</p>
+          <div>
+            {item.outputName}
             <Switch
               color='primary'
               name='checked'
-              checked={item.output ?? false}
+              checked={item.output }
               inputProps={{ 'aria-label': 'primary checkbox' }}
               onChange={onChange}
             />
-          </>
+          </div>
         )}
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
+
+        <Button variant='contained' color='secondary' onClick={onDelete}>
+          Deletar
+        </Button>
       </Paper>
     </div>
   );
 }
 
-export default Connected;
+export default ConnectedBoard;

@@ -39,7 +39,6 @@ void conectadoWifi(void *params)
       {
         configura_botao(botao);
         configura_led(led);
-        //gpio_set_level(led, 1);
       }
     }
   }

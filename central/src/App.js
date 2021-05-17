@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import Switch from '@material-ui/core/Switch';
 
 import { CSVLink } from 'react-csv';
 
 import Server from './mqtt';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
-import Connected from './Connected';
+import ConnectedBoard from './ConnectedBoard';
 
 import useStyles from './styles';
 import Register from './Register';
@@ -18,16 +17,16 @@ const audio = new Audio('https://www.soundjay.com/button/sounds/beep-01a.mp3');
 const App = () => {
   const classes = useStyles();
 
-  const [open, setOpen] = React.useState('');
+  const [cadastrar, setCadastrar] = React.useState('');
   const [play, setPlay] = React.useState(false);
   const [alarm, setAlarm] = React.useState(false);
-  const [connected, setConnected] = React.useState([]);
-  const [unconnected, setUnconnected] = React.useState([]);
+  const [connectedBoard, setConnectedBoard] = React.useState([]);
+  const [unconnectedBoard, setUnconnectedBoard] = React.useState([]);
   const [log, setLog] = React.useState('');
 
   useEffect(() => {
-    Server.handleConnection = setUnconnected;
-    Server.handleConnected = setConnected;
+    Server.handleConnection = setUnconnectedBoard;
+    Server.handleConnected = setConnectedBoard;
     Server.handleLog = setLog;
     Server._handleChange();
   }, []);
@@ -46,47 +45,38 @@ const App = () => {
   }, [play, alarm]);
 
   useEffect(() => {
-    const shouldPlay = connected
+    const shouldPlay = connectedBoard
       .filter(item => item.input && item.alarm)
       .length > 0;
     setPlay(shouldPlay);
-  }, [connected]);
+  }, [connectedBoard]);
 
   const onSubmit = (item) => {
     Server.register(item);
-    setOpen('');
+    setCadastrar('');
   };
 
   return (
     <div className={classes.root}>
-      <div style={{ marginLeft: 40, marginTop: 20 }}>
-        <p>Alarme:</p>
-        <Switch
-          checked={alarm}
-          onChange={e => setAlarm(e.target.checked)}
-          color='primary'
-          name='checked'
-          inputProps={{ 'aria-label': 'primary checkbox' }}
-        />
-      </div>
-      {unconnected.length === 0 && (
+
+      {unconnectedBoard.length === 0 && (
         <Grid item xs={12} sm={6} />
       )}
-      {unconnected.map(item => (
+      {unconnectedBoard.map(item => (
         <>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Paper className={classes.paper}>
               <p>MAC Address: {item.mac}</p>
-              <p>Tipo: {item.type}</p>
-              {open === '' ?
-                <Button variant='contained' color='primary' onClick={() => setOpen(item.mac)}>
+              <p>Alimentação: {item.type}</p>
+              {cadastrar === '' ?
+                <Button variant='contained' color='secondary' onClick={() => setCadastrar(item.mac)}>
                   Cadastrar
         </Button> : null}
-              {open ?
+              {cadastrar ?
                 <Register
                   item={item}
-                  open={open}
-                  onClose={() => setOpen('')}
+                  cadastrar={cadastrar}
+                  onClose={() => setCadastrar('')}
                   submit={onSubmit}
                 /> : null}
             </Paper>
@@ -94,12 +84,22 @@ const App = () => {
         </>
 
       ))}
-      {connected.map(item => (
-        <Connected item={item} />
+      {connectedBoard.map(item => (
+        <ConnectedBoard item={item} />
       ))}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
 
-      <CSVLink data={log} className="btn btn-primary">Download CSV</CSVLink>
-    </div>
+        <Button variant='contained' color='secondary' onClick={() => alarm === false ? setAlarm(true) : setAlarm(false)}>
+          {alarm === false ? "Ligar alarme" : "Desligar alarme"}
+        </Button>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+        <CSVLink data={log} className="btn btn-primary">  <Button variant='contained' color='secondary' >
+          Download CSV
+        </Button></CSVLink>
+      </div>
+
+    </div >
   );
 }
 
