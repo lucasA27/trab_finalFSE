@@ -136,8 +136,6 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     case MQTT_EVENT_DATA:
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
         mqtt_handle_data(event->data_len, event->data);
-        //printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        //printf("DATA=%.*s\r\n", event->data_len, event->data);
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -173,8 +171,6 @@ void mqtt_conection()
 
     char *macValue = le_valor_nvs("macValue");
 
-    //  if (macValue == NULL || strlen(macValue) == 0)
-    // {
     cJSON *conexao = cJSON_CreateObject();
 
     cJSON_AddStringToObject(conexao, "type", ENERGIA);
@@ -188,22 +184,12 @@ void mqtt_conection()
     mqtt_envia_mensagem(topico, json);
     grava_valor_nvs("macValue", mac);
     mqtt_recebe_message(topico);
-    //}
-    /* else
-    {
-        xSemaphoreGive(conexaoRegistroSemaphore);
-
-        char topico[64];
-        snprintf(topico, 64, "fse2020/%d/dispositivos/%s", matricula, mac);
-
-        mqtt_recebe_message(topico);
-    }*/
 
     char *topico_input = in_out_topico("input");
     char *topic_output = in_out_topico("output");
 
-    ESP_LOGI(TAG, "TÓPICO BOTÃO: %s", topico_input);
-    ESP_LOGI(TAG, "TÓPICO LED: %s", topic_output);
+    ESP_LOGI(TAG, "BOTÃO: %s", topico_input);
+    ESP_LOGI(TAG, "LED: %s", topic_output);
 
     mqtt_recebe_message(topic_output);
 }

@@ -12,7 +12,7 @@ import ConnectedBoard from './ConnectedBoard';
 import useStyles from './styles';
 import Register from './Register';
 
-const audio = new Audio('https://www.soundjay.com/button/sounds/beep-01a.mp3');
+const audio = new Audio('https://s19.aconvert.com/convert/p3r68-cdx67/z0z6d-x52is.mp3');
 
 const App = () => {
   const classes = useStyles();

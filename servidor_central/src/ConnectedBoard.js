@@ -26,8 +26,8 @@ const ConnectedBoard = ({ item }) => {
         <p>Alimentação: {item.type}</p>
         {item.type === 'ENERGY' && (
           <>
-            <p>Temperatura: {item.temperature ?? 0}º</p>
-            <p>Umidade: {item.humidity ?? 0}º</p>
+            <p>Temperatura: {item.temperature ?? 0}graus</p>
+            <p>Umidade: {item.humidity ?? 0}</p>
           </>
         )}
         <p>{item.inputName}</p>
