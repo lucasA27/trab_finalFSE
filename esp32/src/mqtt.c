@@ -79,7 +79,6 @@ void mqtt_handle_data(int length, char *data)
     cJSON *body = cJSON_Parse(data);
 
     char *type = cJSON_GetObjectItem(body, "type")->valuestring;
-    char *comando = cJSON_GetObjectItem(body, "comando")->valuestring;
     if (strcmp(type, "registrar") == 0)
     {
         memset(_comodo, 0, sizeof(_comodo));
@@ -168,8 +167,6 @@ void mqtt_conection()
 
     char *mac = malloc(25);
     mac = get_mac_address();
-
-    char *macValue = le_valor_nvs("macValue");
 
     cJSON *conexao = cJSON_CreateObject();
 
