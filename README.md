@@ -9,7 +9,7 @@
 
 ## Objetivo 
 
-O objetivo deste trabalho é criar um sistema distribuído de automação residencial utilizando um computador (PC) como sistema computacional central e placas ESP32 como controladores distribuídos, interconectados via Wifi através do protocolo MQTT. Mais detalhes em: [Projeto](https://gitlab.com/fse_fga/projetos_2020_2/trabalho-final-2020-2)
+O objetivo deste trabalho é criar um sistema distribuído de automação residencial utilizando um computador (PC) como sistema computacional central e placas ESP32 como controladores distribuídos, interconectados via Wifi através do protocolo MQTT. Mais detalhes em podem ser acessados em: [Projeto](https://gitlab.com/fse_fga/projetos_2020_2/trabalho-final-2020-2)
 
 ## Link do video de execução
 
@@ -36,8 +36,15 @@ Para executar o servidor central, através do terminal digite:
 
 Para executar a aplicação embarcada: 
 
-Instale PlatformIO, uma extensão para VScode. Em seguida, instale a placa ESP32 e abra o projeto usando a ferramenta PlatFormIO. 
+``` $ https://github.com/lucasA27/trab_finalFSE ```
 
-No arquivo Kconfig.projbuild deve conter as credencias do seu WIFI, WiFi SSID e Senha do Wifi
+``` $ cd esp32 ```
+
+> Instale PlatformIO, uma extensão para VScode. Em seguida, instale a placa ESP32 e abra o projeto usando a ferramenta PlatFormIO. 
+
+> No arquivo Kconfig.projbuild deve conter as credencias do seu WIFI, WiFi SSID e Senha do Wifi
+
+> Clique em build dentro do PlatFormIO, para compilar o projeto. Em seguida clique em upload and monitor para executar o projeto. 
+
 
 
