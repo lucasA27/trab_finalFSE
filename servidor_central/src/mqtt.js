@@ -45,7 +45,7 @@ class Server {
   _onMessage = (topic, message) => {
     const data = JSON.parse(new TextDecoder('utf-8').decode(message));
     if (topic.includes('dispositivos')) {
-      if (data.type === 'ENERGY' || data.type === 'BATTERY') {
+      if (data.type === 'ENERGY') {
         this.items[data.mac] = data;
       }
     }

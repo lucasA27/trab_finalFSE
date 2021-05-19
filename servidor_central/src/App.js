@@ -43,7 +43,7 @@ const App = () => {
         <>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding:20 }}>
             <Paper className={classes.paper}>
-              <p>MAC Address: {item.mac}</p>
+              <p>MAC_Address: {item.mac}</p>
               <p>Alimentação: {item.type}</p>
               {cadastrar === '' ?
                 <Button variant='contained' color='secondary' onClick={() => setCadastrar(item.mac)}>
@@ -66,7 +66,7 @@ const App = () => {
       ))}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
         <CSVLink data={log} className="btn btn-primary">  <Button variant='contained' color='secondary' >
-          Download CSV
+          Baixar CSV
         </Button></CSVLink>
       </div>
 
