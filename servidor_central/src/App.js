@@ -12,14 +12,10 @@ import ConnectedBoard from './ConnectedBoard';
 import useStyles from './styles';
 import Register from './Register';
 
-const audio = new Audio('https://s19.aconvert.com/convert/p3r68-cdx67/z0z6d-x52is.mp3');
-
 const App = () => {
   const classes = useStyles();
 
   const [cadastrar, setCadastrar] = React.useState('');
-  const [play, setPlay] = React.useState(false);
-  const [alarm, setAlarm] = React.useState(false);
   const [connectedBoard, setConnectedBoard] = React.useState([]);
   const [unconnectedBoard, setUnconnectedBoard] = React.useState([]);
   const [log, setLog] = React.useState('');
@@ -31,25 +27,6 @@ const App = () => {
     Server._handleChange();
   }, []);
 
-  useEffect(() => {
-    Server._handleLog('alarm', alarm ? 'ON' : 'OFF');
-  }, [alarm]);
-
-  useEffect(() => {
-    if (play && alarm) {
-      audio.play();
-    } else {
-      audio.pause();
-      audio.load();
-    }
-  }, [play, alarm]);
-
-  useEffect(() => {
-    const shouldPlay = connectedBoard
-      .filter(item => item.input && item.alarm)
-      .length > 0;
-    setPlay(shouldPlay);
-  }, [connectedBoard]);
 
   const onSubmit = (item) => {
     Server.register(item);
@@ -64,7 +41,7 @@ const App = () => {
       )}
       {unconnectedBoard.map(item => (
         <>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding:20 }}>
             <Paper className={classes.paper}>
               <p>MAC Address: {item.mac}</p>
               <p>Alimentação: {item.type}</p>
@@ -87,12 +64,6 @@ const App = () => {
       {connectedBoard.map(item => (
         <ConnectedBoard item={item} />
       ))}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
-
-        <Button variant='contained' color='secondary' onClick={() => alarm === false ? setAlarm(true) : setAlarm(false)}>
-          {alarm === false ? "Ligar alarme" : "Desligar alarme"}
-        </Button>
-      </div>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
         <CSVLink data={log} className="btn btn-primary">  <Button variant='contained' color='secondary' >
           Download CSV
